@@ -7,6 +7,6 @@ Dependencies:
 
 boost
 
-To build run the build script for your platform or run bjam manually.
+To compile run the build script for your platform or run bjam manually.
 
 Thank you for your support.
