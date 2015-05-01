@@ -15,4 +15,6 @@ CPU mining example:
 ./minerpp --work-hosts=stratum+tcp://username:password@71.43.223.221:3032,stratum+tcp://uasername:password@vnl.suprnova.cc:1111 --device-cores=0 --device-type=cpu --work-algorithm=whirlpoolxor
 ```
 
+* GPU support is currently disabled.
+
 Thank you for your support.
