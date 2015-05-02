@@ -25,11 +25,11 @@ if /i "%processor_architecture%"=="x32" (
         cd %src_path%\test\bin\msvc-*\release\link-static\runtime-link-static
     ) else (
         ..\deps\boost\bjam.exe link=static runtime-link=static address-model=64 release
-		cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
+        cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
     )
 ) else (
     ..\deps\boost\bjam.exe link=static runtime-link=static address-model=64 release
-	cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
+    cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
 )
 
 :Copy fresh bin to main path
