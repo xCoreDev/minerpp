@@ -30,8 +30,7 @@ rule linking ( properties * )
 	else if <target-os>linux in $(properties)
 	{
 		result += 
-			<library>crypto <library>ssl
-			<library>pthread <library>dl
+			<library>pthread
 		;
 	}
 	else
