@@ -3,7 +3,7 @@ set src_path=%CD%
 mkdir deps
 cd %src_path%\deps
 
-:Writing d/l JScript
+:Write d/l JScript
 echo var url = WScript.Arguments(0), >getfile.js
 echo  filename = WScript.Arguments(1), >>getfile.js
 echo   fso = WScript.CreateObject('Scripting.FileSystemObject'), >>getfile.js
@@ -32,7 +32,7 @@ echo   } >>getfile.js
 echo } >>getfile.js
 echo WScript.Quit(0); >>getfile.js
 
-:Writing unzip VBScript
+:Write unzip VBScript
 echo pathToZipFile=Wscript.Arguments(0) >unzip.vbs
 echo extractTo=Wscript.Arguments(1) >>unzip.vbs
 echo set sa = CreateObject('Shell.Application') >>unzip.vbs
@@ -54,7 +54,7 @@ echo exit >> bootstrap.bat
 start /wait bootstrap.bat
 
 
-:Check_Architecture & Build Miner++
+:Check Architecture & Build Miner++
 cd %src_path%\test
 if /i "%processor_architecture%"=="x32" (
     if not defined PROCESSOR_ARCHITEW6432 (
@@ -62,11 +62,11 @@ if /i "%processor_architecture%"=="x32" (
         cd %src_path%\test\bin\msvc-*\release\link-static\runtime-link-static
     ) else (
         ..\deps\boost\bjam.exe link=static runtime-link=static address-model=64 release
-		cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
+        cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
     )
 ) else (
     ..\deps\boost\bjam.exe link=static runtime-link=static address-model=64 release
-	cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
+    cd %src_path%\test\bin\msvc-*\release\address-model-64\link-static\runtime-link-static
 )
 
 :Copy fresh bin to main path
