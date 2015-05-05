@@ -21,6 +21,8 @@
 #include <miner/logger.hpp>
 #include <miner/serial_port.hpp>
 #include <miner/serial_handler_mojov3.hpp>
+#include <miner/stratum_work.hpp>
+#include <miner/utility.hpp>
 
 using namespace miner;
 
@@ -34,7 +36,11 @@ serial_handler_mojov3::serial_handler_mojov3(
 
 void serial_handler_mojov3::on_read(const char * buf, const std::size_t & len)
 {
-    log_debug("Serial handler MojoV3 read len = " << len << ".");
+    log_debug(
+        "Serial handler MojoV3 read  = " << buf << ", len = " << len << "."
+    );
+    
+    // :TODO: Check the resulting hash:nonce.
 }
 
 void serial_handler_mojov3::set_has_new_work(const bool & val)
@@ -43,9 +49,24 @@ void serial_handler_mojov3::set_has_new_work(const bool & val)
     
     if (auto i = serial_port_.lock())
     {
-        const char * test0007 = "0007";
-        
-        i->write(test0007, strlen(test0007));
+        /**
+         * Allocate the big endian data.
+         */
+        std::uint32_t endiandata[32];
+    
+        assert(sizeof(endiandata) == 128);
+
+        /**
+         * Prepare the work.
+         */
+        if (prepare_work(endiandata))
+        {
+            // :TODO: Encode and send 80 bytes of endiandata.
+            
+            const char * test0007 = "hello\r";
+            
+            i->write(test0007, strlen(test0007));
+        }
     }
 }
 
@@ -55,8 +76,55 @@ void serial_handler_mojov3::set_needs_work_restart(const bool & val)
     
     if (auto i = serial_port_.lock())
     {
-        const char * test0007 = "0007";
-        
-        i->write(test0007, strlen(test0007));
+        /**
+         * Allocate the big endian data.
+         */
+        std::uint32_t endiandata[32];
+    
+        assert(sizeof(endiandata) == 128);
+
+        /**
+         * Prepare the work.
+         */
+        if (prepare_work(endiandata))
+        {
+            // :TODO: Encode and send 80 bytes of endiandata.
+            
+            const char * test0007 = "hello\r";
+            
+            i->write(test0007, strlen(test0007));
+        }
     }
+}
+
+bool serial_handler_mojov3::prepare_work(std::uint32_t * val)
+{
+    if (auto i = serial_port_.lock())
+    {
+        /**
+         * Get the work.
+         */
+        const auto & work = i->work();
+        
+        /**
+         * Prepare the work.
+         */
+        if (work)
+        {
+            auto ptr_data = &work->data()[0];
+
+            for (auto kk = 0; kk < 32; kk++)
+            {
+                utility::be32enc(&val[kk], ((std::uint32_t *)ptr_data)[kk]);
+            }
+
+            ptr_data[19] = ++ptr_data[19];
+
+            utility::be32enc(&val[19], ptr_data[19]);
+            
+            return true;
+        }
+    }
+    
+    return false;
 }
