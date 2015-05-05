@@ -109,12 +109,12 @@ bool serial_handler_mojov3::prepare_work(std::uint32_t * val)
 		/**
 		 * Generate the work.
 		 */
-		if (work->generate())
+		if (work && work->generate())
 		{
 			/**
 			 * Prepare the work.
 			 */
-			if (work && work->data().size() > 0)
+			if (work->data().size() > 0)
 			{
 				auto ptr_data = &work->data()[0];
 
