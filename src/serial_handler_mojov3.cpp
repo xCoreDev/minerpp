@@ -106,25 +106,31 @@ bool serial_handler_mojov3::prepare_work(std::uint32_t * val)
          */
         const auto & work = i->work();
         
-        /**
-         * Prepare the work.
-         */
-        if (work)
-        {
-            auto ptr_data = &work->data()[0];
+		/**
+		 * Generate the work.
+		 */
+		if (work->generate())
+		{
+			/**
+			 * Prepare the work.
+			 */
+			if (work && work->data().size() > 0)
+			{
+				auto ptr_data = &work->data()[0];
 
-            for (auto kk = 0; kk < 32; kk++)
-            {
-                utility::be32enc(&val[kk], ((std::uint32_t *)ptr_data)[kk]);
-            }
+				for (auto kk = 0; kk < 32; kk++)
+				{
+					utility::be32enc(&val[kk], ((std::uint32_t *)ptr_data)[kk]);
+				}
 
-            ptr_data[19] = ++ptr_data[19];
+				ptr_data[19] = ++ptr_data[19];
 
-            utility::be32enc(&val[19], ptr_data[19]);
+				utility::be32enc(&val[19], ptr_data[19]);
             
-            return true;
-        }
+				return true;
+			}
+		}
     }
-    
+
     return false;
 }
