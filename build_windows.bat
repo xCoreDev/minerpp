@@ -40,11 +40,11 @@ echo set filesInzip=sa.NameSpace(pathToZipFile).items >>unzip.vbs
 echo sa.NameSpace(extractTo).CopyHere(filesInzip) >>unzip.vbs
 
 :Boost download
-cscript //e:jscript ..\tools\getfile.js http://freefr.dl.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.zip boost_1_58_0.zip
+cscript //e:jscript getfile.js http://freefr.dl.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.zip boost_1_58_0.zip
 
 :Boost unzip
 cd %src_path%\deps
-cscript ..\tools\unzip.vbs %CD%\boost_1_58_0.zip %CD%
+cscript unzip.vbs %CD%\boost_1_58_0.zip %CD%
 
 :Boost setup
 cd %src_path%\deps
