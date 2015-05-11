@@ -181,7 +181,7 @@ void stratum_connection::do_connect(
                 /**
                  * Write the request.
                  */
-                do_write(
+                write(
                     "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": "
                     "[]}\n"
                     "{\"params\": [\"" + username + "\", \"" + password + "\"]"

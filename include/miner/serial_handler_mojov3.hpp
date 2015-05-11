@@ -65,7 +65,10 @@ namespace miner {
             
         private:
         
-            // ...
+            /**
+             * Prepares work (80 bytes work of big endian data) for the device.
+             */
+            bool prepare_work(std::uint32_t * val);
         
         protected:
         
