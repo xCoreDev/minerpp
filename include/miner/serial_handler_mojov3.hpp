@@ -23,6 +23,7 @@
 
 #include <memory>
 
+#include <miner/serial.hpp>
 #include <miner/serial_handler.hpp>
 
 namespace miner {
@@ -64,12 +65,13 @@ namespace miner {
             virtual void set_needs_work_restart(const bool & val);
             
         private:
-        
-            /**
-             * Prepares work (80 bytes work of big endian data) for the device.
-             */
-            bool prepare_work(std::uint32_t * val);
-        
+
+			/**
+			 * Handles an info message.
+			 * @param msg The serial::message.
+			 */
+			bool handle_info(const serial::message_t & msg);
+
         protected:
         
             // ...

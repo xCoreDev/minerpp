@@ -21,6 +21,7 @@
 #ifndef MINER_SERIAL_HANDLER_HPP
 #define MINER_SERIAL_HANDLER_HPP
 
+#include <cstdint>
 #include <memory>
 
 #include <miner/handler.hpp>
@@ -67,6 +68,16 @@ namespace miner {
         
         protected:
         
+            /**
+             * Prepares work (80 bytes work of big endian data) for the device.
+             */
+            bool prepare_work(std::uint32_t * val);
+
+			/**
+			 * Sends test work to the device.
+			 */
+			void send_test_work();
+
             /**
              * The serial_port.
              */
