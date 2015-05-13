@@ -21,6 +21,9 @@
 #ifndef MINER_SERIAL_HPP
 #define MINER_SERIAL_HPP
 
+#include <cstdint>
+#include <vector>
+
 namespace miner {
 
     namespace serial {
@@ -33,6 +36,32 @@ namespace miner {
             device_model_none,
             device_model_mojov3,
         } device_model_t;
+        
+        /**
+         * The message types.
+         */
+        typedef enum message_type_s
+        {
+            message_type_none = 0,
+            message_type_ack = 2,
+            message_type_nack = 4,
+            message_type_ping = 8,
+			message_type_info = 18,
+			message_type_new_work = 19,
+			message_type_restart = 20,
+			message_type_test_work = 21,
+            message_type_error = 0xfe,
+        } message_type_t;
+        
+        /**
+         * The message.
+         */
+        typedef struct message_s
+        {
+            std::uint8_t type;
+            std::uint8_t length;
+            std::vector<std::uint8_t> value;
+        } message_t;
 
     } // namespace serial
 
