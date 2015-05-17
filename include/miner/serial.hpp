@@ -46,10 +46,11 @@ namespace miner {
             message_type_ack = 2,
             message_type_nack = 4,
             message_type_ping = 8,
-			message_type_info = 18,
-			message_type_new_work = 19,
-			message_type_restart = 20,
-			message_type_test_work = 21,
+            message_type_info = 18,
+            message_type_new_work = 19,
+            message_type_restart = 20,
+            message_type_test_work = 21,
+            message_type_result = 22,
             message_type_error = 0xfe,
         } message_type_t;
         
