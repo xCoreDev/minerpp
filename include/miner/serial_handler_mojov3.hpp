@@ -21,6 +21,7 @@
 #ifndef MINER_SERIAL_HANDLER_MOJOV3_HPP
 #define MINER_SERIAL_HANDLER_MOJOV3_HPP
 
+#include <chrono>
 #include <memory>
 
 #include <miner/serial.hpp>
@@ -44,6 +45,16 @@ namespace miner {
             explicit serial_handler_mojov3(
                 std::shared_ptr<serial_port> owner
             );
+        
+            /**
+             * Starts
+             */
+            virtual void start();
+        
+            /**
+             * Stops
+             */
+            virtual void stop();
         
             /**
              * The read handler.
@@ -74,7 +85,29 @@ namespace miner {
 
         protected:
         
-            // ...
+            /**
+             * The state.
+             */
+            enum
+            {
+                state_none,
+                state_starting,
+                state_started,
+                state_stopping,
+                state_stopped
+            } state_;
+        
+			/**
+			 * The read buffer.
+			 */
+			std::vector<std::uint8_t> read_buffer_;
+        
+            /**
+             * The timeout timer.
+             */
+            boost::asio::basic_waitable_timer<
+                std::chrono::steady_clock
+            > timer_timeout_;
     };
     
 } // namespace miner

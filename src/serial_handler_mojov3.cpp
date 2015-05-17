@@ -28,14 +28,51 @@ serial_handler_mojov3::serial_handler_mojov3(
     std::shared_ptr<serial_port> owner
     )
     : serial_handler(owner)
+    , state_(state_none)
+    , timer_timeout_(owner->io_service())
 {
-    log_debug("Serial handler MojoV3 allocated.");
+    // ...
+}
+
+void serial_handler_mojov3::start()
+{
+    log_debug("Serial handler MojoV3 is starting.");
+
+    state_ = state_starting;
 
 	/**
 	 * Get the info from the device to make sure it is a MojoV3.
 	 */
     if (auto i = serial_port_.lock())
     {
+        /**
+         * Start the timeout timer before sending the serial::message_type_info.
+         */
+        timer_timeout_.expires_from_now(std::chrono::seconds(8));
+        timer_timeout_.async_wait(
+            strand_.wrap(
+                [this](boost::system::error_code ec)
+                {
+                    if (ec)
+                    {
+                        // ...
+                    }
+                    else
+                    {
+                        log_info(
+                            "Serial handler MojoV3 device failed to "
+                            "acknowledge info request, calling stop."
+                        );
+                        
+                        /**
+                         * Call stop.
+                         */
+                        stop();
+                    }
+                }
+            )
+        );
+        
 		serial::message_t msg2;
             
 		msg2.type = serial::message_type_info;
@@ -51,6 +88,33 @@ serial_handler_mojov3::serial_handler_mojov3(
 			buffer.size()
 		);
 	}
+    
+    state_ = state_started;
+}
+
+void serial_handler_mojov3::stop()
+{
+    if (state_ == state_starting || state_ == state_started)
+    {
+        log_debug("Serial handler MojoV3 is stopping.");
+        
+        state_ = state_stopping;
+        
+        /**
+         * Cancel the timeout timer.
+         */
+        timer_timeout_.cancel();
+        
+        /**
+         * Close the serial_port last.
+         */
+        if (auto i = serial_port_.lock())
+        {
+            i->close();
+        }
+
+        state_ = state_stopped;
+    }
 }
 
 void serial_handler_mojov3::on_read(const char * buf, const std::size_t & len)
@@ -59,8 +123,58 @@ void serial_handler_mojov3::on_read(const char * buf, const std::size_t & len)
         "Serial handler MojoV3 read  = " << buf << ", len = " << len << "."
     );
 
+#define USE_READ_BUFFER 1
+
 	if (len > 0)
 	{
+#if (defined USE_READ_BUFFER && USE_READ_BUFFER)
+		read_buffer_.insert(read_buffer_.end(), buf, buf + len);
+
+		if (read_buffer_.size() < 2)
+		{
+			return;
+		}
+
+		serial::message_t msg;
+        
+		std::memcpy(&msg, &read_buffer_[0], sizeof(std::uint8_t) * 2);
+
+		auto remaining = read_buffer_.size() - sizeof(std::uint8_t) * 2;
+
+		if (remaining >= msg.length)
+		{
+			if (msg.length > 0)
+			{
+				msg.value.resize(msg.length);
+
+				read_buffer_.erase(read_buffer_.begin());
+				read_buffer_.erase(read_buffer_.begin());
+
+				std::memcpy(
+					&msg.value[0], &read_buffer_[0], msg.length
+				);
+
+				read_buffer_.erase(
+					read_buffer_.begin(), read_buffer_.begin() + msg.length
+				);
+			}
+			else
+			{
+				read_buffer_.erase(read_buffer_.begin());
+				read_buffer_.erase(read_buffer_.begin());
+			}
+		}
+		else
+		{
+			log_error(
+				"Serial handler MojoV3 got invalid length " <<
+				(unsigned)msg.length << " in message, remaining = " <<
+				remaining << "."
+			);
+
+			return;
+		}
+#else
 		serial::message_t msg;
         
 		std::memcpy(&msg, buf, sizeof(std::uint8_t) * 2);
@@ -83,7 +197,7 @@ void serial_handler_mojov3::on_read(const char * buf, const std::size_t & len)
 				);
 			}
 		}
-
+#endif // USE_READ_BUFFER
 		switch (msg.type)
 		{
 			case serial::message_type_ack:
@@ -106,15 +220,23 @@ void serial_handler_mojov3::on_read(const char * buf, const std::size_t & len)
 				if (handle_info(msg))
 				{
 					log_info("Serial handler MojoV3 confirmed device is MoV3.");
+                    
+                    /**
+                     * Cancel the timeout timer.
+                     */
+                    timer_timeout_.cancel();
 				}
 				else
 				{
-					log_error("Serial handler MojoV3 handle info failed, closing.");
+					log_error(
+                        "Serial handler MojoV3 handle info failed, "
+                        "calling stop."
+                    );
 
-					if (auto i = serial_port_.lock())
-					{
-						i->close();
-					}
+                    /**
+                     * Call stop.
+                     */
+                    stop();
 				}
 			}
 			break;
@@ -122,6 +244,14 @@ void serial_handler_mojov3::on_read(const char * buf, const std::size_t & len)
 			{
 				log_debug(
 					"got message_type_test_work, msg.length = " <<
+					(unsigned)msg.length
+				);
+			}
+			break;
+			case serial::message_type_result:
+			{
+				log_debug(
+					"got message_type_result, msg.length = " <<
 					(unsigned)msg.length
 				);
 			}

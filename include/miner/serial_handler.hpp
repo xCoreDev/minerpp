@@ -24,6 +24,8 @@
 #include <cstdint>
 #include <memory>
 
+#include <boost/asio.hpp>
+
 #include <miner/handler.hpp>
 
 namespace miner {
@@ -42,6 +44,16 @@ namespace miner {
              * @param owner The serial_port.
              */
             explicit serial_handler(std::shared_ptr<serial_port> & owner);
+        
+            /**
+             * Starts
+             */
+            virtual void start() = 0;
+        
+            /**
+             * Stops
+             */
+            virtual void stop() = 0;
         
             /**
              * The read handler.
@@ -78,6 +90,11 @@ namespace miner {
 			 */
 			void send_test_work();
 
+            /**
+             * The boost::asio::strand.
+             */
+            boost::asio::strand strand_;
+        
             /**
              * The serial_port.
              */

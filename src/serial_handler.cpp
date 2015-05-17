@@ -30,6 +30,7 @@ using namespace miner;
 
 serial_handler::serial_handler(std::shared_ptr<serial_port> & owner)
     : serial_port_(owner)
+    , strand_(owner->io_service())
 {
     // ...
 }
@@ -55,6 +56,12 @@ void serial_handler::set_has_new_work(const bool & val)
          */
         if (prepare_work(endiandata))
         {
+#if 1
+			/**
+			 * Send test work.
+			 */
+			send_test_work();
+#else
 			/**
 			 * The work length.
 			 */
@@ -78,6 +85,7 @@ void serial_handler::set_has_new_work(const bool & val)
             i->write(
                 reinterpret_cast<const char *> (&buffer[0]), buffer.size()
             );
+#endif
         }
     }
 }
