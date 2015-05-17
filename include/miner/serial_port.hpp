@@ -87,6 +87,11 @@ namespace miner {
             void set_work(const std::shared_ptr<stratum_work> & val);
         
             /**
+             * The boost::asio::io_service.
+             */
+            boost::asio::io_service & io_service();
+        
+            /**
              * Returns a copy of thw work.
              */
             std::shared_ptr<stratum_work> work();

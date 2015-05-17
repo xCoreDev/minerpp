@@ -21,8 +21,10 @@
 #ifndef MINER_SERIAL_HANDLER_MOJOV3_HPP
 #define MINER_SERIAL_HANDLER_MOJOV3_HPP
 
+#include <chrono>
 #include <memory>
 
+#include <miner/serial.hpp>
 #include <miner/serial_handler.hpp>
 
 namespace miner {
@@ -45,6 +47,16 @@ namespace miner {
             );
         
             /**
+             * Starts
+             */
+            virtual void start();
+        
+            /**
+             * Stops
+             */
+            virtual void stop();
+        
+            /**
              * The read handler.
              * @param buf The buffer.
              * @param len The length.
@@ -64,15 +76,38 @@ namespace miner {
             virtual void set_needs_work_restart(const bool & val);
             
         private:
-        
-            /**
-             * Prepares work (80 bytes work of big endian data) for the device.
-             */
-            bool prepare_work(std::uint32_t * val);
-        
+
+			/**
+			 * Handles an info message.
+			 * @param msg The serial::message.
+			 */
+			bool handle_info(const serial::message_t & msg);
+
         protected:
         
-            // ...
+            /**
+             * The state.
+             */
+            enum
+            {
+                state_none,
+                state_starting,
+                state_started,
+                state_stopping,
+                state_stopped
+            } state_;
+        
+			/**
+			 * The read buffer.
+			 */
+			std::vector<std::uint8_t> read_buffer_;
+        
+            /**
+             * The timeout timer.
+             */
+            boost::asio::basic_waitable_timer<
+                std::chrono::steady_clock
+            > timer_timeout_;
     };
     
 } // namespace miner

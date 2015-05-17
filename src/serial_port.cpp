@@ -96,6 +96,11 @@ bool serial_port::open(const std::string & device)
             m_serial_handler = std::make_shared<serial_handler_mojov3> (
                 shared_from_this()
             );
+            
+            /**
+             * Start the serial_handler.
+             */
+            m_serial_handler->start();
         }
         else
         {
@@ -126,9 +131,19 @@ bool serial_port::open(const std::string & device)
 
 void serial_port::close()
 {
+    /**
+     * Stop the serial_handler.
+     */
+    if (m_serial_handler)
+    {
+        m_serial_handler->stop();
+    }
+    
     m_serial_port.close();
     
     timer_.cancel();
+    
+    m_serial_handler.reset();
 }
 
 void serial_port::write(const char * buf, const std::size_t & len)
@@ -159,12 +174,14 @@ void serial_port::set_device_model(const serial::device_model_t & val)
     m_device_model = val;
 }
 
+boost::asio::io_service & serial_port::io_service()
+{
+    return stack_impl_.io_service();
+}
+
 void serial_port::set_work(const std::shared_ptr<stratum_work> & val)
 {
-    log_info(
-        "Serial port " << this << " got new work, size = " <<
-        val->data().size() << "."
-    );
+    log_info("Serial port " << this << " got new work.");
 
     /**
      * If true we have new stratum_work.

@@ -21,7 +21,10 @@
 #ifndef MINER_SERIAL_HANDLER_HPP
 #define MINER_SERIAL_HANDLER_HPP
 
+#include <cstdint>
 #include <memory>
+
+#include <boost/asio.hpp>
 
 #include <miner/handler.hpp>
 
@@ -41,6 +44,16 @@ namespace miner {
              * @param owner The serial_port.
              */
             explicit serial_handler(std::shared_ptr<serial_port> & owner);
+        
+            /**
+             * Starts
+             */
+            virtual void start() = 0;
+        
+            /**
+             * Stops
+             */
+            virtual void stop() = 0;
         
             /**
              * The read handler.
@@ -66,6 +79,21 @@ namespace miner {
             // ...
         
         protected:
+        
+            /**
+             * Prepares work (80 bytes work of big endian data) for the device.
+             */
+            bool prepare_work(std::uint32_t * val);
+
+			/**
+			 * Sends test work to the device.
+			 */
+			void send_test_work();
+
+            /**
+             * The boost::asio::strand.
+             */
+            boost::asio::strand strand_;
         
             /**
              * The serial_port.
